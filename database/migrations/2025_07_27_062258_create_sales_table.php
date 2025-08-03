@@ -14,8 +14,8 @@ return new class extends Migration
             $table->string('customer_name');
             $table->string('customer_email');
             $table->integer('quantity');
-            $table->decimal('total_amount', 10, 2);
-            $table->dateTime('purchase_date');
+            $table->decimal('total_price', 10, 2);
+            $table->string('status')->default('completed');
             $table->timestamps();
         });
     }

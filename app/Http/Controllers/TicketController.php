@@ -2,49 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
 use App\Models\Ticket;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
-    public function index(Event $event)
+    public function index()
     {
-        $tickets = $event->tickets()->paginate(10);
-        return view('tickets.index', compact('event', 'tickets'));
+        $tickets = Ticket::with('event')->paginate(10);
+        return view('tickets.index', compact('tickets'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
-        return view('tickets.create', compact('event'));
+        $events = Event::all();
+        return view('tickets.create', compact('events'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
         $request->validate([
+            'event_id' => 'required|exists:events,id',
             'type' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'quantity_available' => 'required|integer|min:1',
         ]);
 
-        $event->tickets()->create($request->all());
+        Ticket::create($request->all());
 
-        return redirect()->route('events.tickets.index', $event)->with('success', 'Ticket created successfully.');
+        return redirect()->route('tickets.index')->with('success', 'Ticket created successfully.');
     }
 
-    public function show(Event $event, Ticket $ticket)
+    public function show(Ticket $ticket)
     {
-        return view('tickets.show', compact('event', 'ticket'));
+        return view('tickets.show', compact('ticket'));
     }
 
-    public function edit(Event $event, Ticket $ticket)
+    public function edit(Ticket $ticket)
     {
-        return view('tickets.edit', compact('event', 'ticket'));
+        $events = Event::all();
+        return view('tickets.edit', compact('ticket', 'events'));
     }
 
-    public function update(Request $request, Event $event, Ticket $ticket)
+    public function update(Request $request, Ticket $ticket)
     {
         $request->validate([
+            'event_id' => 'required|exists:events,id',
             'type' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'quantity_available' => 'required|integer|min:1',
@@ -52,12 +56,12 @@ class TicketController extends Controller
 
         $ticket->update($request->all());
 
-        return redirect()->route('events.tickets.index', $event)->with('success', 'Ticket updated successfully.');
+        return redirect()->route('tickets.index')->with('success', 'Ticket updated successfully.');
     }
 
-    public function destroy(Event $event, Ticket $ticket)
+    public function destroy(Ticket $ticket)
     {
         $ticket->delete();
-        return redirect()->route('events.tickets.index', $event)->with('success', 'Ticket deleted successfully.');
+        return redirect()->route('tickets.index')->with('success', 'Ticket deleted successfully.');
     }
 }

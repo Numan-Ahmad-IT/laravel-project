@@ -1,48 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>{{ $ticket->type }} Ticket for {{ $event->name }}</h1>
-        <div>
-            <a href="{{ route('events.tickets.edit', [$event, $ticket]) }}" class="btn btn-warning">Edit</a>
-            <a href="{{ route('events.tickets.sales.index', [$event, $ticket]) }}" class="btn btn-secondary">View Sales</a>
-            <a href="{{ route('events.tickets.index', $event) }}" class="btn btn-primary">Back to Tickets</a>
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1>Ticket Details</h1>
+        </div>
+        <div class="col-6 text-end">
+            <a href="{{ route('tickets.edit', $ticket->id) }}" class="btn btn-warning">Edit</a>
+            <form action="{{ route('tickets.destroy', $ticket->id) }}" method="POST" style="display: inline-block;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+            </form>
+            <a href="{{ route('tickets.index') }}" class="btn btn-secondary">Back to Tickets</a>
         </div>
     </div>
 
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-body">
-            <p><strong>Type:</strong> {{ $ticket->type }}</p>
-            <p><strong>Price:</strong> ${{ number_format($ticket->price, 2) }}</p>
-            <p><strong>Available:</strong> {{ $ticket->quantity_available }}</p>
-            <p><strong>Sold:</strong> {{ $ticket->sales->sum('quantity') }}</p>
-            <p><strong>Revenue:</strong> ${{ number_format($ticket->sales->sum('total_amount'), 2) }}</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Ticket Information</h5>
+                    <p><strong>Type:</strong> {{ $ticket->type }}</p>
+                    <p><strong>Price:</strong> ${{ number_format($ticket->price, 2) }}</p>
+                    <p><strong>Available:</strong> {{ $ticket->quantity_available }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Event Information</h5>
+                    <p><strong>Event:</strong> {{ $ticket->event->name }}</p>
+                    <p><strong>Location:</strong> {{ $ticket->event->location }}</p>
+                    <p><strong>Date:</strong> {{ $ticket->event->start_date->format('M d, Y H:i') }}</p>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <h3>Recent Sales</h3>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Customer</th>
-                    <th>Email</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($ticket->sales->take(5) as $sale)
-                    <tr>
-                        <td>{{ $sale->customer_name }}</td>
-                        <td>{{ $sale->customer_email }}</td>
-                        <td>{{ $sale->quantity }}</td>
-                        <td>${{ number_format($sale->total_amount, 2) }}</td>
-                        <td>{{ $sale->purchase_date->format('M d, Y H:i') }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
     </div>
 @endsection

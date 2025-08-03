@@ -2,22 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\Ticket;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SaleFactory extends Factory
 {
     public function definition()
     {
+        $ticket = Ticket::inRandomOrder()->first() ?? Ticket::factory()->create();
+        $quantity = $this->faker->numberBetween(1, 5);
+        
         return [
-            'ticket_id' => \App\Models\Ticket::factory(),
+            'ticket_id' => $ticket->id,
             'customer_name' => $this->faker->name,
             'customer_email' => $this->faker->email,
-            'quantity' => $this->faker->numberBetween(1, 5),
-            'total_amount' => function (array $attributes) {
-                $ticket = \App\Models\Ticket::find($attributes['ticket_id']);
-                return $ticket->price * $attributes['quantity'];
-            },
-            'purchase_date' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'quantity' => $quantity,
+            'total_price' => $quantity * $ticket->price,
+            'status' => 'completed',
         ];
     }
 }
